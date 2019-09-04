@@ -82,7 +82,7 @@ RUN wget https://github.com/ksonnet/ksonnet/releases/download/v${KSONNET_VERSION
     tar -xzf ks_${KSONNET_VERSION}_linux_amd64.tar.gz && chmod +x ks_${KSONNET_VERSION}_linux_amd64/ks && cp -v ks_${KSONNET_VERSION}_linux_amd64/ks /usr/local/bin/
 
 #argo
-ARG ARGO_VERSION=v1.0.0
+ARG ARGO_VERSION=v1.1.1
 RUN wget https://github.com/argoproj/argo-cd/releases/download/${ARGO_VERSION}/argocd-linux-amd64 && chmod +x argocd-linux-amd64 && mv argocd-linux-amd64 /usr/local/bin/argo
 
 
