@@ -1,0 +1,13 @@
+apiVersion: skaffold/v1beta11
+kind: Config
+build:
+  artifacts:
+  - image: gitops-toolkit
+    context: .
+    docker:
+      network: host
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/kayosportsau/gitops-toolkit:{{.VERSION}}'
+  local: {}
+  
