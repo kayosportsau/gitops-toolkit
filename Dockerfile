@@ -1,5 +1,21 @@
-FROM sajid2045/conda-base
+FROM conda/miniconda3
 
+RUN     apt-get update -y && \
+        apt-get install -y  \
+        wget curl jq git tmux watch \
+        bash bash-completion \
+        gcc musl-dev openssl \
+        make groff tree \
+        ca-certificates less \
+        apt-transport-https default-jdk \
+        maven vim && \
+        rm /bin/sh && \
+        ln -s /bin/bash /bin/sh && \
+        rm -rf /var/lib/apt/lists/*
+
+RUN conda install -y nb_conda_kernels
+
+ADD conda-profile-fix.sh /usr/local/etc/profile.d/conda.sh
 RUN conda install -y nb_conda_kernels
 RUN conda create -y -n py27 python=2.7 ipykernel
 RUN conda create -y -n awscli python=3.6.3 ipykernel
@@ -19,7 +35,7 @@ ARG HELM_TILLER_VERSION="0.6.7"
 ARG HELM_DIFF_VERSION="v2.11.0+3"
 ARG KUBECTX_VERSION="0.6.3"
 ARG VELERO_VERSION="0.11.0"
-
+ARG JX_VERSION="v2.0.695"
 
 RUN mkdir /downloads 
 WORKDIR "/downloads"
@@ -59,7 +75,7 @@ RUN echo "complete -C '/usr/local/bin/aws_completer' aws" >> /root/.bashrc
 RUN eksctl completion bash > /root/.eksctl_completion && echo "source /root/.eksctl_completion" >> /root/.bashrc 
 
 #Install JX 
-ARG JX_VERSION=v2.0.420
+
 RUN mkdir -p ~/.jx/bin
 RUN curl -L https://github.com/jenkins-x/jx/releases/download/$JX_VERSION/jx-linux-amd64.tar.gz | tar xzv -C ~/.jx/bin
 RUN export PATH=$PATH:/root/.jx/bin
