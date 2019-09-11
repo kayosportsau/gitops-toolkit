@@ -120,6 +120,10 @@ RUN curl -L https://github.com/github/hub/releases/download/v2.12.1/hub-linux-am
 RUN echo 'export PATH=$PATH:/usr/local/hub-linux/bin' >> /root/.bashrc    
 
 
+RUN wget https://github.com/vmware/octant/releases/download/v0.6.0/octant_0.6.0_Linux-64bit.deb && \
+    dpkg -i octant_0.6.0_Linux-64bit.deb && \
+    rm -rf octant_0.6.0_Linux-64bit.deb
+
 RUN pip install mkdocs
 
 RUN conda clean --all --yes
