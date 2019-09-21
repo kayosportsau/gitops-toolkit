@@ -1,34 +1,23 @@
-FROM sajid2045/conda-base
-
-ADD conda-profile-fix.sh /usr/local/etc/profile.d/conda.sh
-RUN conda install -y nb_conda_kernels
-RUN conda create -y -n py27 python=2.7 ipykernel
-RUN conda create -y -n awscli python=3.6.3 ipykernel
-RUN conda create -y -n sceptre python=3.6.3 ipykernel
-
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
-
-RUN conda init bash
-RUN source /root/.bashrc && conda activate awscli && conda install -y -c conda-forge awscli && conda install -y -c conda-forge/label/gcc7 awscli && conda install -y -c conda-forge/label/cf201901 awscli
-RUN source /root/.bashrc && conda activate awscli && pip install taskcat
-RUN source /root/.bashrc && conda activate sceptre && pip install sceptre
+FROM kayosportsau/ubuntu-okta:1.0.1
 
 #Versions
-ARG KUBECTL_VERSION="1.12.7/2019-03-27"
+ARG KUBECTL_VERSION=v1.13.10
+ARG IAM_AUTHENTICATOR_VERSION="1.12.7/2019-03-27"
 ARG HELM_VERSION="2.14.0"
 ARG HELM_TILLER_VERSION="0.6.7"
 ARG HELM_DIFF_VERSION="v2.11.0+3"
 ARG KUBECTX_VERSION="0.6.3"
 ARG VELERO_VERSION="0.11.0"
 ARG JX_VERSION="v2.0.695"
+ARG GIT_VERSION="2.15.0"
 
 RUN mkdir /downloads 
 WORKDIR "/downloads"
 
 
 #kubectl
-RUN curl -L https://amazon-eks.s3-us-west-2.amazonaws.com/${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
-    curl -L https://amazon-eks.s3-us-west-2.amazonaws.com/${KUBECTL_VERSION}/bin/linux/amd64/aws-iam-authenticator -o /usr/local/bin/aws-iam-authenticator && \
+RUN curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
+    curl -L https://amazon-eks.s3-us-west-2.amazonaws.com/${IAM_AUTHENTICATOR_VERSION}/bin/linux/amd64/aws-iam-authenticator -o /usr/local/bin/aws-iam-authenticator && \
     chmod +x /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/aws-iam-authenticator
 
@@ -46,18 +35,18 @@ RUN curl -L https://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}
     rm -rf /tmp/*
 
 # INSTALL EKSCTL
-ARG EKSCTL_VERSION=latest_release
-RUN curl --location "https://github.com/weaveworks/eksctl/releases/download/${EKSCTL_VERSION}/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-RUN mv /tmp/eksctl /usr/local/bin
+# ARG EKSCTL_VERSION=latest_release
+# RUN curl --location "https://github.com/weaveworks/eksctl/releases/download/${EKSCTL_VERSION}/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+# RUN mv /tmp/eksctl /usr/local/bin
 
-# heptio-authenticator-aws
-RUN wget https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/aws-iam-authenticator 
-RUN cp -v aws-iam-authenticator /usr/local/bin/heptio-authenticator-aws && cp -v aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
-RUN chmod +x /usr/local/bin/heptio-authenticator-aws && chmod +x /usr/local/bin/aws-iam-authenticator
+# # heptio-authenticator-aws
+# RUN wget https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/aws-iam-authenticator 
+# RUN cp -v aws-iam-authenticator /usr/local/bin/heptio-authenticator-aws && cp -v aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
+# RUN chmod +x /usr/local/bin/heptio-authenticator-aws && chmod +x /usr/local/bin/aws-iam-authenticator
 
 RUN echo "source /etc/bash_completion" >> /root/.bashrc
 RUN echo "complete -C '/usr/local/bin/aws_completer' aws" >> /root/.bashrc
-RUN eksctl completion bash > /root/.eksctl_completion && echo "source /root/.eksctl_completion" >> /root/.bashrc 
+# RUN eksctl completion bash > /root/.eksctl_completion && echo "source /root/.eksctl_completion" >> /root/.bashrc 
 
 #Install JX 
 
@@ -112,9 +101,7 @@ RUN curl -L https://github.com/heptio/velero/releases/download/v${VELERO_VERSION
 # RUN cd /istio/istio-${ISTIO_VERSION} &&  cp  bin/istioctl /usr/local/bin/ 
 # # RUN rm -rf istio-${ISTIO_VERSION}
 
-
 #Install Hub
-
 RUN curl -L https://github.com/github/hub/releases/download/v2.12.1/hub-linux-amd64-2.12.1.tgz  -o /tmp/hub.tar.gz && \
     tar -xvzf /tmp/hub.tar.gz -C /tmp && mv /tmp/hub-linux-* /usr/local/hub-linux 
 RUN echo 'export PATH=$PATH:/usr/local/hub-linux/bin' >> /root/.bashrc    
@@ -124,9 +111,11 @@ RUN wget https://github.com/vmware/octant/releases/download/v0.6.0/octant_0.6.0_
     dpkg -i octant_0.6.0_Linux-64bit.deb && \
     rm -rf octant_0.6.0_Linux-64bit.deb
 
-RUN pip install mkdocs
+RUN apt-get update && apt-get install -y software-properties-common && apt-get update && add-apt-repository ppa:git-core/ppa && apt-get update && apt-get -y  upgrade git
 
-RUN conda clean --all --yes
+
+RUN pip3 install mkdocs
+
 RUN rm -rf /downloads/ && rm -rf /tmp/eksctl
 
 RUN echo "alias dep='kubectl get deploy'" >> /root/.bashrc
@@ -139,7 +128,6 @@ RUN echo "alias po='kubectl get pods'" >> /root/.bashrc
 RUN echo "export LC_ALL=C.UTF-8" >> /root/.bashrc
 RUN echo "export LANG=C.UTF-8"   >> /root/.bashrc
 RUN echo "export USER=root" >> /root/.bashrc
-RUN echo "conda activate awscli" >> /root/.bashrc
 
 RUN git config --global alias.co checkout
 RUN git config --global alias.br branch
@@ -154,11 +142,4 @@ RUN echo 'export PATH=$PATH:/root/dev-cheats/' >> /root/.bashrc
 ADD json2yaml /usr/local/bin/json2yaml
 RUN chmod +x /usr/local/bin/json2yaml
 
-# cmd okta-utils
-ADD okta-utils/* /usr/local/bin/
-RUN pip install --no-cache-dir -r /usr/local/bin/okta-utils-requirements.txt
-
-
-
 WORKDIR "/src"
-CMD /bin/bash
