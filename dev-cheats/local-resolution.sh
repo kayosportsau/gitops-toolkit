@@ -12,7 +12,6 @@ CONTROL_PLANE_ENDPOINT=$(aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --o
 PRIVATE_IPS=$(aws ec2 describe-network-interfaces --output text --query 'NetworkInterfaces[?Groups[?GroupId==`'${CONTROL_PLANE_SG}'`]].[PrivateIpAddress]')
 
 Field_Separator=$IFS
-IFS=$'\n'
 
 cp /etc/hosts /etc/hosts_backup
 cat /etc/hosts | grep -v ${CONTROL_PLANE_ENDPOINT#'https://'} > /etc/hosts_new

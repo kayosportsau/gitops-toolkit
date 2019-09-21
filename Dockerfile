@@ -133,7 +133,7 @@ RUN git config --global alias.co checkout
 RUN git config --global alias.br branch
 RUN git config --global alias.st status
 
-ADD dev-cheats /root/dev-cheats
+ADD dev-cheats /root/dev-cheat
 RUN echo 'export PATH=$PATH:/root/dev-cheats/' >> /root/.bashrc
 
 # ADD conda-profile.sh /usr/local/etc/profile.d/conda.sh
