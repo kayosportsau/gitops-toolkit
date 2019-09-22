@@ -24,7 +24,7 @@ pipeline {
 
               script {
                 def buildVersion =  readFile "${env.WORKSPACE}/VERSION"
-                currentBuild.description = "$buildVersion"
+                currentBuild.description = "${DOCKER_REGISTRY}/gitops-toolkit:$buildVersion"
                 currentBuild.displayName = "$buildVersion"
               }          
         }
