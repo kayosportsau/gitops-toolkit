@@ -8,7 +8,7 @@ ARG HELM_TILLER_VERSION="0.6.7"
 ARG HELM_DIFF_VERSION="v2.11.0+3"
 ARG KUBECTX_VERSION="0.6.3"
 ARG VELERO_VERSION="0.11.0"
-ARG JX_VERSION="v2.0.695"
+ARG JX_VERSION="v2.0.770"
 ARG GIT_VERSION="2.15.0"
 
 RUN mkdir /downloads 
@@ -48,14 +48,6 @@ RUN echo "source /etc/bash_completion" >> /root/.bashrc
 RUN echo "complete -C '/usr/local/bin/aws_completer' aws" >> /root/.bashrc
 # RUN eksctl completion bash > /root/.eksctl_completion && echo "source /root/.eksctl_completion" >> /root/.bashrc 
 
-#Install JX 
-
-RUN mkdir -p ~/.jx/bin
-RUN curl -L https://github.com/jenkins-x/jx/releases/download/$JX_VERSION/jx-linux-amd64.tar.gz | tar xzv -C ~/.jx/bin
-RUN export PATH=$PATH:/root/.jx/bin
-RUN echo 'export PATH=$PATH:/root/.jx/bin' >> /root/.bashrc
-RUN echo "source <(kubectl completion bash)" >> /root/.bashrc 
-RUN echo "source <(jx completion bash)" >> /root/.bashrc 
 
 #install kustomize
 ARG KUSTOMIZE_VERSION=2.0.3
@@ -115,6 +107,15 @@ RUN apt-get update && apt-get install -y software-properties-common && apt-get u
 
 
 RUN pip3 install mkdocs
+
+#Install JX 
+RUN mkdir -p ~/.jx/bin
+RUN curl -L https://github.com/jenkins-x/jx/releases/download/$JX_VERSION/jx-linux-amd64.tar.gz | tar xzv -C ~/.jx/bin
+RUN export PATH=$PATH:/root/.jx/bin
+RUN echo 'export PATH=$PATH:/root/.jx/bin' >> /root/.bashrc
+RUN echo "source <(kubectl completion bash)" >> /root/.bashrc 
+RUN echo "source <(jx completion bash)" >> /root/.bashrc 
+
 
 RUN rm -rf /downloads/ && rm -rf /tmp/eksctl
 
